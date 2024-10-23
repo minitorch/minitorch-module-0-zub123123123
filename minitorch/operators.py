@@ -32,7 +32,53 @@ from typing import Callable, Iterable
 # $f(x) = |x - y| < 1e-2$
 
 
-# TODO: Implement for Task 0.1.
+def mul(a: float, b: float):
+    return a * b
+
+def id(a: float):
+    return a
+
+def add(a: float, b: float):
+    return a + b
+
+def neg(a: float):
+    return -a
+
+def lt(a: float, b: float):
+    return a < b
+
+def eq(a: float, b: float):
+    return lt(b, a)
+
+def max(a: float, b: float):
+    return max(a, b)
+
+def is_close(a: float, b: float, atol: float = 1e-8, rtol: float = 1e-5):
+    return abs(add(a, neg(b))) <= add(atol, mul(rtol, abs(b)))
+
+def sigmoid(x: float):
+    return inv(add(1, math.exp(-x)))
+
+def relu(x: float):
+    return x if x >= 0 else 0
+
+def log(x: float):
+    return math.log(x)
+
+def exp(x: float):
+    return math.exp(x)
+
+def inv(x: float):
+    return 1 / x
+
+def log_back(df: float, f: float):
+    return df * inv(f)
+
+def inv_back(x: float):
+    return -inv(x * x)
+
+def relu_back(x: float):
+    return 1 if x >= 0 else 0
 
 
 # ## Task 0.3
@@ -51,4 +97,37 @@ from typing import Callable, Iterable
 # - prod: take the product of lists
 
 
-# TODO: Implement for Task 0.3.
+def map(func: Callable, iterator: Iterable):
+    for obj in iterator:
+        yield func(obj)
+
+def zipWith(func: Callable, iterator1: Iterable, iterator2: Iterable):
+    it1, it2 = iter(iterator1), iter(iterator2)
+    obj1, obj2 = next(it1, None), next(it2, None)
+    while obj1 and obj2:
+        yield func(obj1, obj2)
+        obj1, obj2 = next(it1, None), next(it2, None)
+    assert (not obj1) and (not obj2)
+
+def reduce(func: Callable, iterator: Iterable):
+    it = iter(iterator)
+    first = next(it)
+    nxt = next(it)
+    reduced = func(first, nxt)
+    nxt = next(it, None)
+    while nxt:
+        reduced = func(reduced, nxt)
+        nxt = next(it)
+    return reduced
+
+def negList(lst: list) -> list:
+    return list(map(neg, lst))
+
+def addLists(lst1: list, lst2: list):
+    return list(zipWith(add, lst1, lst2))
+
+def sum(lst: list):
+    return reduce(add, lst)
+
+def prod(lst: list):
+    return reduce(mul, lst)
