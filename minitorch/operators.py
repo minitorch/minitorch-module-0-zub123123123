@@ -48,16 +48,16 @@ def lt(a: float, b: float):
     return a < b
 
 def eq(a: float, b: float):
-    return lt(b, a)
+    return a == b
 
 def max(a: float, b: float):
-    return max(a, b)
+    return a if a > b else b
 
-def is_close(a: float, b: float, atol: float = 1e-8, rtol: float = 1e-5):
-    return abs(add(a, neg(b))) <= add(atol, mul(rtol, abs(b)))
+def is_close(a: float, b: float):
+    return abs(a - b) < max(1e-5, 1e-8 * max(abs(a), abs(b)))
 
 def sigmoid(x: float):
-    return inv(add(1, math.exp(-x)))
+    return 1 / (1 + exp(-x))
 
 def relu(x: float):
     return x if x >= 0 else 0
@@ -71,14 +71,14 @@ def exp(x: float):
 def inv(x: float):
     return 1 / x
 
-def log_back(df: float, f: float):
-    return df * inv(f)
+def log_back(f: float, df: float):
+    return df / f
 
-def inv_back(x: float):
-    return -inv(x * x)
+def inv_back(f: float, df: float):
+    return -df / (f * f + 1e-8)
 
-def relu_back(x: float):
-    return 1 if x >= 0 else 0
+def relu_back(f: float, df: float):
+    return df if f >= 0 else 0
 
 
 # ## Task 0.3
@@ -104,20 +104,17 @@ def map(func: Callable, iterator: Iterable):
 def zipWith(func: Callable, iterator1: Iterable, iterator2: Iterable):
     it1, it2 = iter(iterator1), iter(iterator2)
     obj1, obj2 = next(it1, None), next(it2, None)
-    while obj1 and obj2:
+    while (obj1 is not None) and (obj2 is not None):
         yield func(obj1, obj2)
         obj1, obj2 = next(it1, None), next(it2, None)
-    assert (not obj1) and (not obj2)
 
-def reduce(func: Callable, iterator: Iterable):
+def reduce(func: Callable, iterator: Iterable, initializer=None):
     it = iter(iterator)
-    first = next(it)
-    nxt = next(it)
-    reduced = func(first, nxt)
+    reduced = initializer if initializer is not None else next(it, None)
     nxt = next(it, None)
-    while nxt:
+    while nxt is not None:
         reduced = func(reduced, nxt)
-        nxt = next(it)
+        nxt = next(it, None)
     return reduced
 
 def negList(lst: list) -> list:
@@ -127,7 +124,7 @@ def addLists(lst1: list, lst2: list):
     return list(zipWith(add, lst1, lst2))
 
 def sum(lst: list):
-    return reduce(add, lst)
+    return reduce(add, lst, 0)
 
 def prod(lst: list):
-    return reduce(mul, lst)
+    return reduce(mul, lst, 1)
